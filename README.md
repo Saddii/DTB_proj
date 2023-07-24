@@ -1,5 +1,5 @@
 # DTBpr
-Repo na projekt z baz danych
+Projekt z baz danych
 
 Założenia
 
