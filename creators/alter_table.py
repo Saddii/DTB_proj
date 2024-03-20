@@ -3,8 +3,7 @@
 def alter_table(con):
     """
     funkcja dodająca klucz obcy do tabeli tournaments
-    musi być osobno bo coś nie mogę go dodać zanim powstaną inne
-    tabele
+    
     """
 
     cs = con.cursor()
