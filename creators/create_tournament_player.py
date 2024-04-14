@@ -15,10 +15,11 @@ def create_tournament_player(con):
 if __name__ == "__main__":
     import mysql.connector
     con = mysql.connector.connect(
-            host = "giniewicz.it",
-            user = "team04",
-            password = "te@m0a",
-            database = "team04",
+            host = "127.0.0.1",
+            user = "root",
+            password = "password",
+            database = "clients_base",
+            port= 3307
             )
     if con:
         print("connected")

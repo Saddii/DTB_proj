@@ -23,10 +23,11 @@ def bob_the_builder():
 
     
     con = mysql.connector.connect(
-            host = "giniewicz.it",
-            user = "team04",
-            password = "te@m0a",
-            database = "team04",
+            host = "127.0.0.1",
+            user = "root",
+            password = "password",
+            database = "clients_base",
+            port= 3307
             )
     if not con:
         raise Exception("connection error")
