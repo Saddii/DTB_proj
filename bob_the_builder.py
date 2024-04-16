@@ -16,19 +16,26 @@ from fill import fill_customers, fill_staff, fill_inventory, fill_games, fill_to
 
 def bob_the_builder():
     """
-    uruchamia wszystkie funkcje tworzące tabele;
-    potem uruchamia funkcje dodającą zależności
-    (której jeszcze nie ma)
+    creates and fills all tables.
     """
 
-    
-    con = mysql.connector.connect(
-            host = "127.0.0.1",
-            user = "root",
-            password = "password",
-            database = "clients_base",
-            port= 3307
-            )
+    try:
+        con = mysql.connector.connect(
+                host = "127.0.0.1",
+                user = "root",
+                password = "password",
+                database = "clients_base",
+                )
+    except:
+        con = mysql.connector.connect(
+                host = "127.0.0.1",
+                user = "root",
+                password = "password",
+                )
+        cs = con.cursor()
+        cs.execute("CREATE DATABASE clients_base")
+        
+
     if not con:
         raise Exception("connection error")
     
