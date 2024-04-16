@@ -27,10 +27,10 @@ def ile_spotkan(k):
 def losuj_tournament(dane):
     lista = []
     list_pomoc = []
-    numerki = random.choices(range(0, 40), k=random.randint(72,120))
+    numerki = random.choices(range(0, 40), k=random.randint(500,600))
     for i in range(len(numerki)):
         while dane[numerki[i]][3] == 1 or dane[numerki[i]][3] == 0:
-            numerki[i] = random.randint(1, 40)   
+            numerki[i] = random.randint(0, 39)   
     start_date = datetime(2020, 1, 1)
     end_date = datetime(2022, 12, 31)
     for i in range(len(numerki)):
@@ -48,4 +48,4 @@ def losuj_tournament(dane):
 if __name__ == "__main__":
     pass
     #dane = generate_games(40)
-    #print(losuj_tournament(dane)[0])
+    #print(len(losuj_tournament(dane)[0]))

@@ -4,5 +4,5 @@ con = mysql.connector.connect(
             user = "root",
             password = "password",
             database = "clients_base",
-            port= 3307
+            port= 3306
             )
