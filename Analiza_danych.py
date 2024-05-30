@@ -29,6 +29,7 @@ def top_10_tournament_players(cs,g_id):
                 return top_10
         else:
                 print("Brak turniej dla danej gry.")
+                
 def best_players(cs):
         """
         Funkcja zwraca graczy którzy wygrali najwiecej turniejów w danej grze.
@@ -44,7 +45,7 @@ def top5_selers_AND_rental(cs):
         cs.execute("SELECT games.title as 'Game title',sum(payment.amount) as 'Sum of rental' from payment inner join inventory on payment.rental_id_or_last_rental_id=inventory.inventory_id inner join games on inventory.game_id=games.game_id WHERE rental_id_or_last_rental_id LIKE '___' GROUP BY games.game_id ORDER by sum(payment.amount) DESC LIMIT 5")
         top_5_rental=cs.fetchall()
         
-        cs.execute("SELECT games.title as 'Game title',sum(payment.amount) as 'Sum of rental' from payment inner join inventory on substring(payment.rental_id_or_last_rental_id,16)=inventory.inventory_id inner join games on inventory.game_id=games.game_id WHERE rental_id_or_last_rental_id LIKE 'l%' GROUP BY games.game_id ORDER by sum(payment.amount) DESC LIMIT 5")
+        cs.execute("SELECT games.title as 'Game title',sum(payment.amount) as 'Sum of sold' from payment inner join inventory on substring(payment.rental_id_or_last_rental_id,16)=inventory.inventory_id inner join games on inventory.game_id=games.game_id WHERE rental_id_or_last_rental_id LIKE 'l%' GROUP BY games.game_id ORDER by sum(payment.amount) DESC LIMIT 5")
         top_5_sold=cs.fetchall()
         return  top_5_rental,top_5_sold
 
@@ -68,6 +69,7 @@ def longest_tournament(cs):
         cs.execute("SELECT games.game_id,games.title,TIMESTAMPDIFF(MINUTE,tournaments.start_date,tournaments.end_date) as 'Czas_trwania_turnieju[min]' from tournaments inner join games on tournaments.game_id=games.game_id ORDER BY TIMESTAMPDIFF(MINUTE,tournaments.start_date,tournaments.end_date) DESC LIMIT 10")
         top_10=cs.fetchall()
         return (top_10)
+
 def longest_tournament_plot(cs):       
         cs.execute("SELECT games.game_id,games.title,sum(TIMESTAMPDIFF(MINUTE,tournaments.start_date,tournaments.end_date)) as 'Czas_trwania_turnieju[min]',count(*) from tournaments inner join games on tournaments.game_id=games.game_id GROUP BY games.title ORDER BY SUM(TIMESTAMPDIFF(MINUTE,tournaments.start_date,tournaments.end_date)) DESC")
         X= cs.fetchall()
@@ -77,6 +79,7 @@ def longest_tournament_plot(cs):
         kategorie = [sr[i][0] for i in range(len(sr))]
         wartosci = [sr[i][1] for i in range(len(sr))]
         return(kategorie,wartosci)
+
 def top_10_clients(cs):
         cs.execute("select payment.customer_id,customers.first_name,customers.last_name,sum(amount),count(*) from payment inner join customers on payment.customer_id=customers.customer_id GROUP by payment.customer_id ORDER by sum(amount) DESC")
         X = cs.fetchall()
@@ -87,8 +90,29 @@ def top_10_clients(cs):
         kategorie = [sr[i][0] for i in range(len(sr))]
         wartosci = [sr[i][1] for i in range(len(sr))]
 
-       
         return top10,kategorie,wartosci
+
+def sells_VS_rental_num(cs):
+        cs.execute("""
+SELECT num_of_rental,CASE WHEN sold.inventory_id is null then 0 ELSE 1 END
+FROM (
+    SELECT inventory_id
+    FROM payment 
+    INNER JOIN rental ON substring(payment.rental_id_or_last_rental_id, 16) = rental.rental_id
+    WHERE payment.rental_id_or_last_rental_id LIKE 'l%' 
+    GROUP BY inventory_id
+) AS sold
+RIGHT JOIN (
+    SELECT inventory_id, COUNT(*) AS num_of_rental
+    FROM payment
+    LEFT JOIN rental ON payment.rental_id_or_last_rental_id = rental.rental_id
+    WHERE payment.rental_id_or_last_rental_id LIKE '___' 
+    GROUP BY inventory_id
+) AS wyp
+ON sold.inventory_id = wyp.inventory_id;
+""")
+        X=cs.fetchall()
+        return X
         
 
 if __name__ == "__main__":
@@ -106,7 +130,23 @@ if __name__ == "__main__":
         if not con:
                 raise Exception("connection error")
         cs = con.cursor()
+        sells_rental_num=sells_VS_rental_num(cs)
+        print(sells_rental_num)
+        X=[]
+        Y=[]
+        for i in sells_rental_num:
+                X.append(int(i[1]))
+                Y.append(i[0])
+        print(X,Y)
         
+        X= [0, 9, 0, 11, 10, 9, 8, 11, 9, 8, 7, 5, 3, 3, 1, 1, 0, 0, 0, 0, 0, 0, 3, 2, 2, 2, 1] 
+        plt.hist(X)
+        plt.show()
+        
+        # plt.plot(X,Y,'o')
+        # plt.show()
+
+
         # df = pd.DataFrame(staff_ranking(cs),columns=["Date","Staff_id","First_name","Last_Name","Earn"])
         # print("\n                 Employee of the month ")
         # print(df,"\n")
