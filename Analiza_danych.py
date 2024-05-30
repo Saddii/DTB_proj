@@ -24,11 +24,17 @@ def top_10_tournament_players(cs,g_id):
         g_ids =cs.fetchall()
         g_ids=list(element[0] for element in g_ids)
         if g_id in g_ids:
-                cs.execute("SELECT games.title,first_name,last_name,COUNT(list_of_players.customer_id) from list_of_players inner join tournaments on list_of_players.tournament_id=tournaments.tournament_id inner join games on tournaments.game_id=games.game_id inner join customers on list_of_players.customer_id=customers.customer_id WHERE place=1 and games.game_id=%s GROUP BY list_of_players.customer_id",[g_id])
+                cs.execute("SELECT games.title,first_name,last_name,COUNT(list_of_players.customer_id) from list_of_players inner join tournaments on list_of_players.tournament_id=tournaments.tournament_id inner join games on tournaments.game_id=games.game_id inner join customers on list_of_players.customer_id=customers.customer_id WHERE place=1 and games.game_id=%s GROUP BY list_of_players.customer_id ORDER BY COUNT(*) DESC LIMIT 10",[g_id])
                 top_10=cs.fetchall()
                 return top_10
         else:
                 print("Brak turniej dla danej gry.")
+def best_players(cs):
+        """
+        Funkcja zwraca graczy którzy wygrali najwiecej turniejów w danej grze.
+        """
+        cs.execute("SELECT title,first_name,last_name,MAX(won_num) best_player FROM (SELECT games.game_id,games.title,first_name,last_name,COUNT(list_of_players.customer_id) as won_num from list_of_players inner join tournaments on list_of_players.tournament_id=tournaments.tournament_id inner join games on tournaments.game_id=games.game_id inner join customers on list_of_players.customer_id=customers.customer_id WHERE place=1 GROUP BY list_of_players.customer_id ORDER BY COUNT(*) DESC) as sub1 GROUP BY game_id")
+        return cs.fetchall()
 
 def top5_selers_AND_rental(cs):
         '''
@@ -92,60 +98,61 @@ if __name__ == "__main__":
         import matplotlib.pyplot as plt
 
         con = mysql.connector.connect(
-                host = "giniewicz.it",
-                user = "team04",
-                password = "te@m0a",
-                database = "team04",
+                host = "127.0.0.1",
+                user = "root",
+                password = "password",
+                database = "clients_base",
                 )
         if not con:
                 raise Exception("connection error")
         cs = con.cursor()
         
-        df = pd.DataFrame(staff_ranking(cs),columns=["Date","Staff_id","First_name","Last_Name","Earn"])
-        print("\n                 Employee of the month ")
-        print(df,"\n")
+        # df = pd.DataFrame(staff_ranking(cs),columns=["Date","Staff_id","First_name","Last_Name","Earn"])
+        # print("\n                 Employee of the month ")
+        # print(df,"\n")
 
-        df = pd.DataFrame(top_10_tournament_players(cs,g_id=1),columns=["Game_title","First_name","Last_name","Num_of_wins"])
-        print("\n                 Top10 players")
-        print(df,"\n")
+        # df = pd.DataFrame(top_10_tournament_players(cs,g_id=1),columns=["Game_title","First_name","Last_name","Num_of_wins"])
+        # print("\n                 Top10 players")
+        # print(df,"\n")
         
-        df_rental = pd.DataFrame(top5_selers_AND_rental(cs)[0],columns=["Game Title", "Sum of rental amount"])
-        print("\n                  Top5 games earning by rental")
-        print(df_rental,"\n")
+        # df_rental = pd.DataFrame(top5_selers_AND_rental(cs)[0],columns=["Game Title", "Sum of rental amount"])
+        # print("\n                  Top5 games earning by rental")
+        # print(df_rental,"\n")
         
-        df_sold = pd.DataFrame(top5_selers_AND_rental(cs)[1],columns=["Game Title", "Sum of solds amount"])
-        print("\n                 Top 5 best-selling games")
-        print(df_sold,"\n")
+        # df_sold = pd.DataFrame(top5_selers_AND_rental(cs)[1],columns=["Game Title", "Sum of solds amount"])
+        # print("\n                 Top 5 best-selling games")
+        # print(df_sold,"\n")
 
-        #Najdluższy czas wynajmowania
-        plt.plot(days_rental(cs)[0],'o')
-        plt.title("Wykres punktowy czasu wynajmu gry.")
-        plt.xlabel("ID_gry")
-        plt.ylabel("Czas wynajmu [dni].")
-        plt.show()
-        plt.boxplot(days_rental(cs)[1],vert=False)
-        plt.xlabel("Czas wynajmu [dni]")
-        plt.title("Wykres pudełkowy wynajmu gier.")
-        plt.show()
-        #Najdłuższy czas turnieju
-        df=pd.DataFrame(longest_tournament(cs),columns=["id_gry","Tytuł","czas trwania turnieju[min]"])
-        print(df,"\n")
-        #Wykres średnich czasu trwania turnieju
+        # #Najdluższy czas wynajmowania
+        # plt.plot(days_rental(cs)[0],'o')
+        # plt.title("Wykres punktowy czasu wynajmu gry.")
+        # plt.xlabel("ID_gry")
+        # plt.ylabel("Czas wynajmu [dni].")
+        # plt.show()
+        # plt.boxplot(days_rental(cs)[1],vert=False)
+        # plt.xlabel("Czas wynajmu [dni]")
+        # plt.title("Wykres pudełkowy wynajmu gier.")
+        # plt.show()
+        # #Najdłuższy czas turnieju
+        # df=pd.DataFrame(longest_tournament(cs),columns=["id_gry","Tytuł","czas trwania turnieju[min]"])
+        # print(df,"\n")
+        # #Wykres średnich czasu trwania turnieju
         
-        plt.bar(longest_tournament_plot(cs)[0],longest_tournament_plot(cs)[1])
-        plt.title("Wykres słupkowy średniego czasu turniejów")
-        plt.xlabel('Id gry')
-        plt.ylabel('Minuty')
-        plt.show()
+        # plt.bar(longest_tournament_plot(cs)[0],longest_tournament_plot(cs)[1])
+        # plt.title("Wykres słupkowy średniego czasu turniejów")
+        # plt.xlabel('Id gry')
+        # plt.ylabel('Minuty')
+        # plt.show()
 
-        #Top_10 najwięcej wydających klientów, oraz wykres średniej wszystkich transakcji.
+        # #Top_10 najwięcej wydających klientów, oraz wykres średniej wszystkich transakcji.
         
-        tabela=pd.DataFrame(top_10_clients(cs)[0],columns=["Id_klienta","Imię","Nazwisko","Suma","Ilość płatności"])
-        print(tabela)
-        plt.bar(top_10_clients(cs)[1],top_10_clients(cs)[2])
-        plt.title("Średnia wartość transakcji klienta")
-        plt.xlabel("Id klietna")
-        plt.ylabel("Kwota")
-        plt.show()
-        
-        con.close()
+        # tabela=pd.DataFrame(top_10_clients(cs)[0],columns=["Id_klienta","Imię","Nazwisko","Suma","Ilość płatności"])
+        # print(tabela)
+        # plt.bar(top_10_clients(cs)[1],top_10_clients(cs)[2])
+        # plt.title("Średnia wartość transakcji klienta")
+        # plt.xlabel("Id klietna")
+        # plt.ylabel("Kwota")
+        # plt.show()
+        # x=pd.DataFrame(best_players(cs),columns=["Game_title","First_name","Last_name","Num_of_wins"])
+        # print(x)
+        # con.close()

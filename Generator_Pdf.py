@@ -8,10 +8,10 @@ from datetime import date
 current_path = os.path.dirname(os.path.abspath(__file__))
 
 con = mysql.connector.connect(
-                host = "giniewicz.it",
-                user = "team04",
-                password = "te@m0a",
-                database = "team04",
+                host = "127.0.0.1",
+                user = "root",
+                password = "password",
+                database = "clients_base",
                 )
 if not con:
                 raise Exception("connection error")
