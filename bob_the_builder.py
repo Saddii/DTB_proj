@@ -18,6 +18,7 @@ def bob_the_builder():
     """
     creates and fills all tables.
     """
+   
 
     try:
         con = mysql.connector.connect(
@@ -25,12 +26,15 @@ def bob_the_builder():
                 user = "root",
                 password = "password",
                 database = "clients_base",
+                port = 3307
                 )
     except:
         con = mysql.connector.connect(
                 host = "127.0.0.1",
                 user = "root",
                 password = "password",
+                database = "clients_base",
+                port = 3307
                 )
         cs = con.cursor()
         cs.execute("CREATE DATABASE clients_base")
@@ -40,10 +44,11 @@ def bob_the_builder():
         raise Exception("connection error")
     
     cs = con.cursor()
+    # cs.execute("DROP TABLE IF EXISTS customers,inventory,tournaments,games,staff,rental,payment,players,tournament_player")
     cs.execute("SET FOREIGN_KEY_CHECKS=0")
     cs.fetchall()
     
-    cs.execute("DROP TABLE IF EXISTS customers,inventory,tournaments,games,staff,rental,payment,players,tournament_player")
+   
 
     create_customers(con)
     create_inventory(con)
