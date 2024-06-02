@@ -140,19 +140,7 @@ if __name__ == "__main__":
         if not con:
                 raise Exception("connection error")
         cs = con.cursor()
-        sells_rental_num=sells_VS_rental_num(cs)
-        print(sells_rental_num)
-        X=[]
-        Y=[]
-        for i in sells_rental_num:
-                X.append(int(i[1]))
-                Y.append(i[0])
-        print(X,Y)
-        
-        X= [0, 9, 0, 11, 10, 9, 8, 11, 9, 8, 7, 5, 3, 3, 1, 1, 0, 0, 0, 0, 0, 0, 3, 2, 2, 2, 1] 
-        plt.hist(X)
-        plt.show()
-        
+       
         # plt.plot(X,Y,'o')
         # plt.show()
 
