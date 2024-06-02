@@ -94,7 +94,14 @@ def top_10_clients(cs):
 
 def sells_VS_rental_num(cs):
         cs.execute("""
-SELECT num_of_rental,CASE WHEN sold.inventory_id is null then 0 ELSE 1 END
+SELECT num_of_rental as rental_before_buys FROM 
+(SELECT inventory_id,0 as num_of_rental,1 as BOUGHT
+FROM inventory
+WHERE inventory_id NOT IN (
+    SELECT DISTINCT (inventory_id)
+    FROM rental)
+UNION 
+SELECT wyp.inventory_id,num_of_rental,CASE WHEN sold.inventory_id is null then 0 ELSE 1 END as BOUGHT
 FROM (
     SELECT inventory_id
     FROM payment 
@@ -105,11 +112,14 @@ FROM (
 RIGHT JOIN (
     SELECT inventory_id, COUNT(*) AS num_of_rental
     FROM payment
-    LEFT JOIN rental ON payment.rental_id_or_last_rental_id = rental.rental_id
-    WHERE payment.rental_id_or_last_rental_id LIKE '___' 
+    RIGHT JOIN rental ON payment.rental_id_or_last_rental_id = rental.rental_id
     GROUP BY inventory_id
 ) AS wyp
-ON sold.inventory_id = wyp.inventory_id;
+ON sold.inventory_id = wyp.inventory_id) as sub1
+where BOUGHT =1
+
+
+;
 """)
         X=cs.fetchall()
         return X

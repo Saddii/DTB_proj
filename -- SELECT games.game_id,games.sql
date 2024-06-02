@@ -68,7 +68,7 @@ ORDER by num DESC
 
 ;
 
-SELECT num_of_sells,num_of_rental FROM(
+SELECT title,num_of_sells,num_of_rental FROM(
 SELECT COALESCE(games_bought.title, games_rented.title) as title,
        COALESCE(games_bought.num_of_sells, 0) as num_of_sells,
        COALESCE(games_rented.num_of_rental, 0) as num_of_rental
@@ -125,7 +125,7 @@ ORDER BY COALESCE(num_of_sells, 0) DESC, COALESCE(num_of_rental, 0) DESC
 
 --sprzedane
 SELECT num_of_rental,sum(BOUGHT) FROM (
-SELECT num_of_rental,CASE WHEN sold.inventory_id is null then 0 ELSE 1 END as BOUGHT
+SELECT wyp.inventory_id,num_of_rental,CASE WHEN sold.inventory_id is null then 0 ELSE 1 END as BOUGHT
 FROM (
     SELECT inventory_id
     FROM payment 
@@ -133,7 +133,7 @@ FROM (
     WHERE payment.rental_id_or_last_rental_id LIKE 'l%' 
     GROUP BY inventory_id
 ) AS sold
-LEFT JOIN (
+RIGHT JOIN (
     SELECT inventory_id, COUNT(*) AS num_of_rental
     FROM payment
     RIGHT JOIN rental ON payment.rental_id_or_last_rental_id = rental.rental_id
@@ -145,4 +145,41 @@ GROUP BY num_of_rental
 
 
 select * from rental;
-     
+
+
+
+SELECT num_of_rental,count(*) FROM 
+(SELECT inventory_id,0 as num_of_rental,1 as BOUGHT
+FROM inventory
+WHERE inventory_id NOT IN (
+    SELECT DISTINCT (inventory_id)
+    FROM rental)
+UNION 
+SELECT wyp.inventory_id,num_of_rental,CASE WHEN sold.inventory_id is null then 0 ELSE 1 END as BOUGHT
+FROM (
+    SELECT inventory_id
+    FROM payment 
+    INNER JOIN rental ON substring(payment.rental_id_or_last_rental_id, 16) = rental.rental_id
+    WHERE payment.rental_id_or_last_rental_id LIKE 'l%' 
+    GROUP BY inventory_id
+) AS sold
+RIGHT JOIN (
+    SELECT inventory_id, COUNT(*) AS num_of_rental
+    FROM payment
+    RIGHT JOIN rental ON payment.rental_id_or_last_rental_id = rental.rental_id
+    GROUP BY inventory_id
+) AS wyp
+ON sold.inventory_id = wyp.inventory_id) as sub1
+where BOUGHT =1
+GROUP BY num_of_rental
+
+;
+
+
+WITH zero_rentals AS (
+    SELECT inventory_id
+    FROM inventory
+    WHERE inventory_id NOT IN (
+        SELECT DISTINCT (inventory_id)
+        FROM rental
+    ))
